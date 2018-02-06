@@ -8,17 +8,14 @@ mpl.rcParams['mathtext.default'] = 'regular'
 import matplotlib.pyplot as plt
 import numpy as np
 import sequtils as seq
-#np.set_printoptions(precision=2)
-
+#Gas constant in kcal/K/mol
+R = 1.987204118e-3
 #Boolean, export images to public_html (False) or local folder (True)
 local = True
 if local:
 	path = "."
 else:
 	path = "../../public_html"
-
-#Gas constant in kcal/K/mol
-R = 1.987204118e-3
 
 #5'-3' Sequence of the probe, LNA bases indicated by +N
 #probe ="G+CGGC+CC+ACC+TG+CTGGT+A+CG" #human FSDH-KpnI probe
@@ -84,8 +81,6 @@ def deltaG37(seq,seq2,init):
 		prevc = c
 		prevd = d
 	for t in terms:
-		print( t)
-		#print NNparameters[t][2]
 		deltag = deltag + NNparameters[bytes(t, encoding='utf-8')][2]
 		
 	#Initiation terms for the deltaG
@@ -94,10 +89,8 @@ def deltaG37(seq,seq2,init):
 		for prevc in [prevc,initc] :
 			if prevc == 'C' or prevc == 'G' or prevc == "+C" or prevc == "+G":
 				deltag += 0.98
-				#print "CG initiation: ", 0.98
 			if prevc == 'A' or prevc =='T' or prevc == "+A" or prevc == "+T":
 				deltag += 1.03
-					#print "AT initiation: ", 1.03	
 	return deltag
 
 #Function to calculate the entropy at 37 degrees C
@@ -115,15 +108,9 @@ def entropy(seq,seq2,init):
 		prevc = c
 		prevd = d
 	for t in terms:
-	#	print t
-	#	print NNparameters[t][1]
 		entropy = entropy + NNparameters[bytes(t, encoding='utf-8')][1]
 					
 #	for t in terms:
-#		entropy= entropy + NNparameters[t][1]
-#		#print t, 
-#		#print NNentropy[t]
-#
 	#Initiation terms for the entropy
 	#WARNING: this is not correct for the LNA bases 
 	if init:
@@ -131,10 +118,8 @@ def entropy(seq,seq2,init):
 		for prevc in [prevc,initc] :
 			if prevc == 'C' or prevc == 'G' or prevc == "+C" or prevc == "+G":
 				entropy += -2.8
-				#	print "CG initiation: ", -2.8
 			if prevc == 'A' or prevc =='T' or prevc == "+A" or prevc == "+T":
 				entropy += 4.1
-					#		print "AT initiation: ", 4.1
 	return entropy
 
 #Function to calculate the enthalpy at 37 degrees C
@@ -152,8 +137,6 @@ def enthalpy(seq,seq2,init):
 		prevc = c
 		prevd = d
 	for t in terms:
-		#print t
-		#print NNparameters[t][0]
 		enthalpy = enthalpy + NNparameters[bytes(t, encoding='utf-8')][0]
 				
 	#Initiation terms for the entropy
@@ -181,18 +164,11 @@ def findMatches(seq1,seq2):
 	for i,c in enumerate(seq1):	
 		#Loop over all lengths of matches
 		for j in np.arange(1,len(seq1)):
-			#Loop over all starting positions of the match in seq2
-		#	for k,e in enumerate(seq2):
                  for k in np.arange(0,len(seq2)):		
-            		#print "\n"
-				#print seq1[i:i+j]
-				#print seq2[k:k+i+j]
-				#print "\n"
                      comp = seq.checkComp(seq1[i:i+j],seq2[k:k+j])
                      if comp:# and j+k >4:
 #TODO:				Check for bulge possibility
                          dGtemp = deltaG37(seq1[i:i+j],seq2[k:k+j],True)
-					#print "Yeah, ",dGtemp, " ", seq1[i:i+j], " ", seq2[k:k+j]
                          matches.append(dGtemp)
                          if dGtemp < dG:
                              dG = dGtemp
@@ -215,11 +191,6 @@ def plotStructure(seq1,seq2,seq3,i,j,k):
     #plt.text(0,0.2,"Hybrid: "+''.join(seq.makeComp(seq3[::-1]))+ "      dG: " + str(deltaG37(seq3)))
     if toehold > 0:
         plt.text(0,0.1,"End: "+''.join(seq2[-i:][:-toehold][-k:]))
-    #print seq1
-    #print seq2
-    #print seq2[-i:]
-    #print seq2[-i:][:-toehold]
-    #print seq2[-i:][:-toehold][:-k-len(seq3)]
     plt.text(0.8,0.35,"Probe")
     plt.text(.8,0.3,''.join(seq1[:-i][j+len(seq3):]))#Bulge
     plt.text(.8,0.2,''.join(seq3))#Hybrid
@@ -324,8 +295,6 @@ for i in np.arange(0,len(probe_invading)+1):
 	probe_energies.append(energy_probe)
 	probe_entropies.append(entropy_probe)
 	probe_enthalpies.append(enthalpy_probe)
-
-	#print "END PROBE", "\n"
 
 	#print "Target"
 	if i > toehold:
