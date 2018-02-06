@@ -23,9 +23,9 @@ R = 1.987204118e-3
 #5'-3' Sequence of the probe, LNA bases indicated by +N
 #probe ="G+CGGC+CC+ACC+TG+CTGGT+A+CG" #human FSDH-KpnI probe
 #probe = "T+A+TA+GG+GAATA+TT+AAGCT" #LNA probe w/o extra
-#probe = "T+A+TA+GG+GAATA+TT+AAGCTG" #LNA probe
-probe = "G+CA+C+A+T+ATA+CACC+ATGC" #LNA probe LINE1 NcoI
-probe = "T+TGGAG+T+T+GC+TC+T+TC+TCGAC" #LNA probe LINE1 XhoI
+probe = "T+A+TA+GG+GAATA+TT+AAGCTG" #LNA probe
+#probe = "G+CA+C+A+T+ATA+CACC+ATGC" #LNA probe LINE1 NcoI
+#probe = "T+TGGAG+T+T+GC+TC+T+TC+TCGAC" #LNA probe LINE1 XhoI
 #probe = "T+A+TA+GG+GAATA+TT+AAGCT" #LNA probe w/o 3'stack
 #probe = "T+A+TA+GG+GAATA+TT+A" #LNA probe w/o toehold
 #probe = "TATAGGGAATATTAAGCT" #LNA probe without LNA
@@ -84,9 +84,9 @@ def deltaG37(seq,seq2,init):
 		prevc = c
 		prevd = d
 	for t in terms:
-		#print t
+		print( t)
 		#print NNparameters[t][2]
-		deltag = deltag+ NNparameters[t][2]
+		deltag = deltag + NNparameters[bytes(t, encoding='utf-8')][2]
 		
 	#Initiation terms for the deltaG
 	#WARNING: this is not correct for the LNA bases
@@ -117,7 +117,7 @@ def entropy(seq,seq2,init):
 	for t in terms:
 	#	print t
 	#	print NNparameters[t][1]
-		entropy = entropy + NNparameters[t][1]
+		entropy = entropy + NNparameters[bytes(t, encoding='utf-8')][1]
 					
 #	for t in terms:
 #		entropy= entropy + NNparameters[t][1]
@@ -154,7 +154,7 @@ def enthalpy(seq,seq2,init):
 	for t in terms:
 		#print t
 		#print NNparameters[t][0]
-		enthalpy = enthalpy + NNparameters[t][0]
+		enthalpy = enthalpy + NNparameters[bytes(t, encoding='utf-8')][0]
 				
 	#Initiation terms for the entropy
 	#WARNING: this is not correct for the LNA bases 
@@ -188,20 +188,20 @@ def findMatches(seq1,seq2):
 				#print seq1[i:i+j]
 				#print seq2[k:k+i+j]
 				#print "\n"
-				comp = seq.checkComp(seq1[i:i+j],seq2[k:k+j])
-				if comp:# and j+k >4:
+                     comp = seq.checkComp(seq1[i:i+j],seq2[k:k+j])
+                     if comp:# and j+k >4:
 #TODO:				Check for bulge possibility
-					dGtemp = deltaG37(seq1[i:i+j],seq2[k:k+j],True)
+                         dGtemp = deltaG37(seq1[i:i+j],seq2[k:k+j],True)
 					#print "Yeah, ",dGtemp, " ", seq1[i:i+j], " ", seq2[k:k+j]
-					matches.append(dGtemp)
-					if dGtemp < dG:
-						dG = dGtemp
-						#print "DG:", dG," ", seq1[i:i+j]
-						seqN = seq1[i:i+j]
-						cB = i
-						#cE = j
-						#seqT = seq2[k:k+i+j]
-						cC = k
+                         matches.append(dGtemp)
+                         if dGtemp < dG:
+                             dG = dGtemp
+                             #print "DG:", dG," ", seq1[i:i+j]
+                             seqN = seq1[i:i+j]
+                             cB = i
+					#cE = j
+					#seqT = seq2[k:k+i+j]
+                             cC = k
 	return dG,seqN,cB,cC,matches
 
 def calcKd(dG):
@@ -273,14 +273,14 @@ probe_enthalpies = []
 
 x = []
 
-print '\n'
-print "========================================"
-print "Probe: ", probe
-print " "
-print "Target: ", seq.makeComp(target)
-print " "
-print "========================================" 
-print '\n'
+print('\n')
+print("========================================")
+print("Probe: ", probe)
+print(" ")
+print( "Target: ", seq.makeComp(target))
+print( " ")
+print( "========================================" )
+print( '\n')
 
 toeholdZero = ( toehold == 0 )
 
@@ -296,8 +296,8 @@ if toehold:
     toehold_seq = seq.toList(target[-toehold:])
     invaded_target = seq.toList(target[:-toehold])
 
-print "Probe " , probe_invading, " ", extra_seq
-print "Target " , invaded_target, " ", toehold_seq
+print( "Probe " , probe_invading, " ", extra_seq)
+print( "Target " , invaded_target, " ", toehold_seq)
 
 #Loop to do the strand invasion
 for i in np.arange(0,len(probe_invading)+1):
@@ -369,12 +369,12 @@ for i in np.arange(0,len(probe_invading)+1):
 	#raw_input("Press Enter to continue...")
 
 ###ENTROPY#####
-print total_enthalpy
+print(total_enthalpy)
 total_enthalpy = total_enthalpy-(probe_enthalpies[0]+target_enthalpies[0])
-print total_enthalpy
-print total_entropy
+print( total_enthalpy)
+print( total_entropy)
 total_entropy = total_entropy-(probe_entropies[0]+target_entropies[0])
-print total_entropy
+print( total_entropy)
 #print "Tm: ", total_enthalpy/(total_entropy/1000.0+R*np.log(1.0e-6))-273.15
 #Tm = total_enthalpy/(total_entropy/1000.0+R*np.log(0.156e-9))-273.15
 #Tm = total_enthalpy/((total_entropy/1000.0)+R*np.log(0.25e-6 - 0.25e-6/10.0))-273.15
@@ -382,16 +382,16 @@ print total_entropy
 #Tm = total_enthalpy/((total_entropy/1000.0)+R*np.log(6e-13/4.0))-273.15
 Tm = total_enthalpy/((total_entropy/1000.0)+R*np.log(0.370e-9))-273.15
 #Tm = total_enthalpy/((total_entropy/1000.0)+R*np.log(0.25e-6))-273.15
-print "Tm: ", Tm
+print( "Tm: ", Tm)
 Tm2 = 1.0/(1.0/Tm + ((4.29*12.0/14.0 - 3.95)*np.log(2) + 0.940 * (np.log(2))**2.0)* 1.0e-5)
-print "Tm salt correction: ", Tm2
+print( "Tm salt correction: ", Tm2)
 
-print "Gibbs Free Energy (H,S): ", total_enthalpy-(273.15+37.0)*total_entropy/1000.0, "kcal/mol"
+print( "Gibbs Free Energy (H,S): ", total_enthalpy-(273.15+37.0)*total_entropy/1000.0, "kcal/mol")
 ###ENTROPY#####
 	
 #Calculating kD
-print '\n', "########################"
-print "Calculating Kd: "
+print( '\n', "########################")
+print( "Calculating Kd: ")
 energy_target = GibbsN[0]#0
 
 for objects in GibbsN:
@@ -403,13 +403,13 @@ for objects in GibbsN:
 #else:	
 #	energy_target = deltaG37(seq.makeComp(invaded_target[:-toehold]))
 #	energy_target += deltaG37(extra_seq)
-print "Target: ", energy_target, " kcal/mol"
-print "Target+ Probe: ", total_energy, " kcal/mol"
-print "Gibbs Free Energy (G): ",total_energy-energy_target, "kcal/mol"
+print( "Target: ", energy_target, " kcal/mol")
+print( "Target+ Probe: ", total_energy, " kcal/mol")
+print("Gibbs Free Energy (G): ",total_energy-energy_target, "kcal/mol")
 Kdcalc = calcKd(-np.abs(energy_target-total_energy))
-print "Kd (no SideDuplex)", Kdcalc/1.0e-9, " nM"
+print("Kd (no SideDuplex)", Kdcalc/1.0e-9, " nM")
 #print "Breaking force: ", (energy_target-total_energy)/(bp*0.332*0.1439), " pN"
-print "Breaking force: ", (energy_target-total_energy)/(bp*(1500.0/4650.0)*0.1439), " pN"
+print( "Breaking force: ", (energy_target-total_energy)/(bp*(1500.0/4650.0)*0.1439), " pN")
 
 GibbsX = []
 GibbsY = []
@@ -424,7 +424,7 @@ for i,t in enumerate(GibbsO):
 Kdmin = Kdcalc
 if GibbsY:
     Kdmin = calcKd(-np.abs(np.min(GibbsY)-energy_target))/1.0e-9
-print "Kd lowest energy: ", Kdmin
+print( "Kd lowest energy: ", Kdmin)
 
 
 #Plotting
@@ -446,7 +446,7 @@ ax2.set_ylabel("Gibbs free energy (kT) T=37C ")
 ax2.set_ylabel("Gibbs free energy (kT)")
 plt.savefig(path+"/gibbs.png")
 
-print GibbsN[12]
+print(GibbsN[12])
 #Plotting
 plt.clf()
 plt.plot(x,Gibbs_Sideduplex,marker="o",label="With sideduplex")
