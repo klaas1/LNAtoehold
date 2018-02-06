@@ -18,27 +18,13 @@ else:
 	path = "../../public_html"
 
 #5'-3' Sequence of the probe, LNA bases indicated by +N
-#probe ="G+CGGC+CC+ACC+TG+CTGGT+A+CG" #human FSDH-KpnI probe
-#probe = "T+A+TA+GG+GAATA+TT+AAGCT" #LNA probe w/o extra
-probe = "T+A+TA+GG+GAATA+TT+AAGCTG" #LNA probe
-#probe = "G+CA+C+A+T+ATA+CACC+ATGC" #LNA probe LINE1 NcoI
-#probe = "T+TGGAG+T+T+GC+TC+T+TC+TCGAC" #LNA probe LINE1 XhoI
-#probe = "T+A+TA+GG+GAATA+TT+AAGCT" #LNA probe w/o 3'stack
-#probe = "T+A+TA+GG+GAATA+TT+A" #LNA probe w/o toehold
-#probe = "TATAGGGAATATTAAGCT" #LNA probe without LNA
+#probe = "T+A+TA+GG+GAATA+TT+AAGCTG" #LNA probe
 #probe = "CGGCAA+GCCGC+A+TGGC" #Sideduplex probe
+probe = "G+CA+C+CC+CGT+C+AA+CTGCAG" #AtaI GalI reversed acgt+ca+a+ctg+cc+c+ca+cg
 #probe = "GGGCGGCGACCTC" #Lambda
-#probe = "GGGCGGCGACCT" #Lambda w/o extra bases
-#probe = "GCCGCGGCCGCCCG"
 #probe = "G+GT+CGTT+CG+CTC+CA+AGCT+GGG" #Arthur probe BseYI
 #probe = "G+TG+GG+TC+TCGC+GGTG" #Arthur probe BsaI
-#probe = "C+AA+TT+TG+TGG+AA+TTC+TCGAC" #LacO Repeat XhoI
-#probe = "A+TTT+G+TGGAA+TTC+TCGAC" #LacO Repeat XhoI
-#probe = "G+AGTCG+ACGC+ATGC+A+AGCT" #LacO repeat hindIII
-#probe = "T+GGAA+TTC+TC+GA+C+TC+TAGC" #lacO XbaI
-#read probe from txt file
-#probelist = open('probe.txt', 'r')
-#probe = probelist.readline() # reads first probe, "for line in probelist" reads all
+
 #3'-5' Complementary sequence of the target with toehold
 #for non-complementary sequences, define target manually
 target = ""
@@ -51,17 +37,16 @@ for i in probe:
         target = target + "C"
     if(i == "C"):
         target = target + "G"
-bp=len(target)        
-#target = "GCCGAAACGGCGTAC" #override autotarget for mismatches
-#target = "ATATCGCTTATAATTCGACG"
-#print 'target =', target
-print(bp,'bp')
-#Number of 5'-toehold bases in the target
-toehold = 4
+    
 probeextra = 1 #Are there bases to stack to (if probe is a hairpin, probably yes) Add the last base of the hairpin to the probe sequence
+toehold = 4
 if probeextra:
     target = target[:-probeextra]
-    bp = bp-probeextra
+
+bp=len(target)    
+#target = "GCCGAAACGGCGTAC" #override autotarget for mismatches
+print(target, ', ',bp,' bp')
+#Number of 5'-toehold bases in the target
 
 parameters = np.genfromtxt('NNparamsv3.csv',delimiter=",",dtype=None,skip_header=1) #loads parameters
 NNparameters = {label[0]: [float(label[1]),float(label[2]),float(label[3])] for label in parameters}
@@ -195,9 +180,6 @@ def plotStructure(seq1,seq2,seq3,i,j,k):
     plt.text(.8,0.3,''.join(seq1[:-i][j+len(seq3):]))#Bulge
     plt.text(.8,0.2,''.join(seq3))#Hybrid
     plt.text(.8,0.1,''.join(seq1[:-i][:j]))#End
-    #print seq1
-    #print seq1[:-i]
-    #print seq1[:-i][j+len(seq3):]
     #Plot doublestranded part
     for n,c in enumerate(seq2[:-i]+seq1[-i:]):
         if n > len(seq2[:-i])-1:
@@ -221,7 +203,7 @@ def plotStructure(seq1,seq2,seq3,i,j,k):
         else:
                 plt.text(0.05*(n-i+1),0.55+0.04*p,c,color='blue')
     plt.axis('off')
-    plt.savefig(path+"/structure_"+str(i)+".png")
+    plt.savefig(path+"/figures/structure_"+str(i)+".png")
 		
 #Convert the probe and target sequences to list format
 probe = seq.toList(probe)
@@ -327,11 +309,6 @@ for i in np.arange(0,len(probe_invading)+1):
 	Gibbs_Sideduplex.append(total_energy)
 	GibbsN.append(energy_probe+energy_target)
 	GibbsO.append(matches)
-	#print "Free energy (",basesinc," bases incorporated): ", 
-	#print energy , "kcal/mol"
-	#print "Free energy (no sideduplex): ",
-	#print pr+tr
-	#print '\n'
 	#if energy < pr+tr:		
 	plotStructure(probe,seq.makeComp(target),sd1,i,j,k)
 	x.append(i)
@@ -354,7 +331,6 @@ Tm = total_enthalpy/((total_entropy/1000.0)+R*np.log(0.370e-9))-273.15
 print( "Tm: ", Tm)
 Tm2 = 1.0/(1.0/Tm + ((4.29*12.0/14.0 - 3.95)*np.log(2) + 0.940 * (np.log(2))**2.0)* 1.0e-5)
 print( "Tm salt correction: ", Tm2)
-
 print( "Gibbs Free Energy (H,S): ", total_enthalpy-(273.15+37.0)*total_entropy/1000.0, "kcal/mol")
 ###ENTROPY#####
 	
@@ -413,7 +389,7 @@ ax2 = ax.twinx()
 ax2.set_ylim((ax.get_ylim()[0]*1.623,ax.get_ylim()[1]*1.623))
 ax2.set_ylabel("Gibbs free energy (kT) T=37C ")
 ax2.set_ylabel("Gibbs free energy (kT)")
-plt.savefig(path+"/gibbs.png")
+plt.savefig(path+"/figures/gibbs.png")
 
 print(GibbsN[12])
 #Plotting
@@ -434,7 +410,7 @@ ax2 = ax.twinx()
 ax2.set_ylim((ax.get_ylim()[0]*1.623,ax.get_ylim()[1]*1.623))
 ax2.set_ylabel("Gibbs free energy (kT) T=37C ")
 ax2.set_ylabel("Gibbs free energy (kT)")
-plt.savefig(path+"/ent.png")
+plt.savefig(path+"/figures/ent.png")
 #
 plt.clf()
 plt.scatter(x,probe_energies,c='green',label="probe FE")
@@ -443,7 +419,7 @@ plt.legend()
 plt.xticks(np.arange(-1,(bp+1),1))
 plt.xlabel("Bases incorporated")
 plt.ylabel("Gibbs free energy (kcal/mol)")
-plt.savefig(path+"/gibbs2.png")
+plt.savefig(path+"/figures/gibbs2.png")
 
 #Plotting Boltzmann
 plt.clf()
@@ -476,9 +452,9 @@ plt.yticks(np.arange(0,1,0.1))
 plt.yscale("log")
 plt.xlabel("Bases incorporated")
 plt.ylabel("Probability")
-plt.savefig(path+"/boltz.png")
+plt.savefig(path+"/figures/boltz.png")
 
-results = open(path+"/results.html",'w')
+results = open(path+"/figures/results.html",'w')
 results.write("<html>")
 results.write("<head>")
 results.write("</head>")
