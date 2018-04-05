@@ -1,6 +1,7 @@
 
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# By JHuisman and NHermans
 
 import matplotlib as mpl
 mpl.rcParams['mathtext.default'] = 'regular'
@@ -38,14 +39,15 @@ for i in probe:
     if(i == "C"):
         target = target + "G"
     
-probeextra = 1 #Are there bases to stack to (if probe is a hairpin, probably yes) Add the last base of the hairpin to the probe sequence
+probeextra = 1 #Are there bases to stack to (if probe is a hairpin, probably yes). 
+		#Add the starting base of the hairpin to the probe sequence. 
+	        #This will remove the penalty for the stacking at the end
 toehold = 4
 if probeextra:
     target = target[:-probeextra]
-
-bp=len(target)    
+ 
 #target = "GCCGAAACGGCGTAC" #override autotarget for mismatches
-print(target, ', ',bp,' bp')
+print(target, ', ',len(target),' bp')
 #Number of 5'-toehold bases in the target
 
 parameters = np.genfromtxt('NNparamsv3.csv',delimiter=",",dtype=None,skip_header=1) #loads parameters
